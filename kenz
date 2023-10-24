@@ -3,14 +3,31 @@
 import RPi.GPIO as GPIO
 import time
 
-TRIG = 11
-ECHO = 12
-Buzzer = 15
+TRIG = 15
+ECHO = 6
+Buzzer = 11
 
 def setup():
 	GPIO.setmode(GPIO.BOARD)
 	GPIO.setup(TRIG, GPIO.OUT)
 	GPIO.setup(ECHO, GPIO.IN)
+	
+def setup(pin):
+	global BuzzerPin
+	BuzzerPin = pin
+	GPIO.setup(BuzzerPin, GPIO.OUT)
+	GPIO.output(BuzzerPin, GPIO.HIGH)
+
+def on():
+	GPIO.output(BuzzerPin, GPIO.LOW)
+
+def off():
+	GPIO.output(BuzzerPin, GPIO.HIGH)
+def beep(x):
+	on()
+	time.sleep(x)
+	off()
+	time.sleep(x)
 
 def distance():
 	GPIO.output(TRIG, 0)
@@ -37,7 +54,7 @@ def loop():
 		print (dis, 'ft')
 		print ('')
 		time.sleep(0.3)
-    while True:
+   	 while True:
 		        beep(0.5)
 
 def destroy():
