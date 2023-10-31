@@ -1,7 +1,0 @@
-/home/pi/ultrasonic plus active:12: RuntimeWarning: This channel is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.
-  GPIO.setup(TRIG, GPIO.OUT)
-/home/pi/ultrasonic plus active:14: RuntimeWarning: This channel is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.
-  GPIO.setup(BUZZER, GPIO.OUT)
-
-
-
