@@ -1,0 +1,11 @@
+def waitForMotion():
+  while True:
+    i = GPIO. input(MOTION)
+    if i == 1: 
+      break
+      
+def waitForNoMotion():
+  while True:
+    i = GPIO.input(MOTION)
+    if i == 0 :
+      break
