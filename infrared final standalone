@@ -1,11 +1,20 @@
+import RPi.GPIO as GPIO
+
+# Define the pin number to which the motion sensor is connected
+MOTION = 14  # Replace 14 with the actual GPIO pin number to which the sensor is connected
+
+# Set up the GPIO mode and initial state
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(MOTION, GPIO.IN)
+
 def waitForMotion():
-  while True:
-    i = GPIO. input(MOTION)
-    if i == 1: 
-      break
-      
+    while True:
+        i = GPIO.input(MOTION)
+        if i == 1:
+            break
+
 def waitForNoMotion():
-  while True:
-    i = GPIO.input(MOTION)
-    if i == 0 :
-      break
+    while True:
+        i = GPIO.input(MOTION)
+        if i == 0:
+            break
