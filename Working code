@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+
+import RPi.GPIO as GPIO
+import time
+
+TRIG = 11
+ECHO = 12
+BUZZER = 13  # GPIO pin for the buzzer
+IR_SENSOR = 18  # GPIO pin for the infrared sensor
+
+def setup():
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setwarnings(False)
+    GPIO.setup(TRIG, GPIO.OUT)
+    GPIO.setup(ECHO, GPIO.IN)
+    GPIO.setup(BUZZER, GPIO.OUT)
+    GPIO.setup(IR_SENSOR, GPIO.IN)
+
+def distance():
+    GPIO.output(TRIG, 0)
+    time.sleep(0.000002)
+
+    GPIO.output(TRIG, 1)
+    time.sleep(0.00001)
+    GPIO.output(TRIG, 0)
+
+    while GPIO.input(ECHO) == 0:
+        pass
+    time1 = time.time()
+    while GPIO.input(ECHO) == 1:
+        pass
+    time2 = time.time()
+
+    during = time2 - time1
+    return during * 340 / 2 * 39.37  # Convert to inches
+
+def loop():
+    try:
+        while True:
+            dis = distance()
+            print(f'Distance: {dis:.2f} inches')
+
+            sensor_value = GPIO.input(IR_SENSOR)
+            print(f"IR Sensor Value: {sensor_value}")
+
+            if sensor_value == 1:
+                print("I SEE HUMAN !!")
+            else:
+                print("I SEE OBJECT !!")
+
+            if dis <= 30:
+                GPIO.output(BUZZER, GPIO.LOW)
+            else:
+                GPIO.output(BUZZER, GPIO.HIGH)
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        destroy()
+
+def destroy():
+    GPIO.cleanup()
+
+if __name__ == "__main__":
+    setup()
+    try:
+        loop()
+    except KeyboardInterrupt:
+        destroy()
