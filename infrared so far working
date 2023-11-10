@@ -48,11 +48,11 @@ def loop():
             else:
                 print("I SEE OBJECT !!")
 
-            if dis <= 30:
+            if dis <= 40:
                 GPIO.output(BUZZER, GPIO.LOW)
             else:
                 GPIO.output(BUZZER, GPIO.HIGH)
-            time.sleep(0.1)
+            time.sleep(0.4)
     except KeyboardInterrupt:
         destroy()
 
