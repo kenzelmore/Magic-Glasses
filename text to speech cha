@@ -1,5 +1,8 @@
-from gtts import gTTS
-import os
+#!/usr/bin/env python3
+
+import subprocess
+import RPi.GPIO as GPIO
+import time
 
 # Rest of the code remains the same
 
@@ -12,10 +15,8 @@ def loop():
             if dis <= 30:
                 GPIO.output(BUZZER, GPIO.LOW)
                 # Convert text to speech
-                speech = "Intruder detected"
-                speech = gTTS(text=speech, lang='en', slow=False)
-                speech.save("intruder.mp3")
-                os.system("mpg321 intruder.mp3")  # Play the generated speech
+                speech = "HUMAN AHEAD !!"
+                subprocess.call(['espeak', speech])
             else:
                 GPIO.output(BUZZER, GPIO.HIGH)
             waitForNoMotion()
