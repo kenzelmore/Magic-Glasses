@@ -2,9 +2,10 @@
 
 import RPi.GPIO as GPIO
 import time
+import subprocess
 
-TRIG = 11
-ECHO = 12
+TRIG = 11      #GPIO pin for ultrasonic
+ECHO = 12       #^
 BUZZER = 13  # GPIO pin for the buzzer
 IR_SENSOR = 18  # GPIO pin for the infrared sensor
 
@@ -36,13 +37,13 @@ def distance():
     
 def waitForMotion():
     while True:
-        i = GPIO.input(MOTION)
+        i = GPIO.input(IR_SENSOR)
         if i == 1:
             break
             
 def waitForNoMotion():
     while True:
-        i = GPIO.input(MOTION)
+        i = GPIO.input(IR_SENSOR)
         if i == 0:
             break
 
