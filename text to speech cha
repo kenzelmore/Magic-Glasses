@@ -1,10 +1,50 @@
 #!/usr/bin/env python3
 
-import subprocess
 import RPi.GPIO as GPIO
 import time
 
-# Rest of the code remains the same
+TRIG = 11
+ECHO = 12
+BUZZER = 13  # GPIO pin for the buzzer
+IR_SENSOR = 18  # GPIO pin for the infrared sensor
+
+def setup():
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setwarnings(False)
+    GPIO.setup(TRIG, GPIO.OUT)
+    GPIO.setup(ECHO, GPIO.IN)
+    GPIO.setup(BUZZER, GPIO.OUT)
+    GPIO.setup(IR_SENSOR, GPIO.IN)
+
+def distance():
+    GPIO.output(TRIG, 0)
+    time.sleep(0.000002)
+
+    GPIO.output(TRIG, 1)
+    time.sleep(0.00001)
+    GPIO.output(TRIG, 0)
+
+    while GPIO.input(ECHO) == 0:
+        pass
+    time1 = time.time()
+    while GPIO.input(ECHO) == 1:
+        pass
+    time2 = time.time()
+
+    during = time2 - time1
+    return during * 340 / 2 * 39.37  # Convert to inches
+    
+def waitForMotion():
+    while True:
+        i = GPIO.input(MOTION)
+        if i == 1:
+            break
+            
+def waitForNoMotion():
+    while True:
+        i = GPIO.input(MOTION)
+        if i == 0:
+            break
 
 def loop():
     try:
@@ -12,13 +52,33 @@ def loop():
             waitForMotion()
             dis = distance()
             print(f'Distance: {dis:.2f} inches')
+
+            sensor_value = GPIO.input(IR_SENSOR)
+            print(f"IR Sensor Value: {sensor_value}")
+
+            if sensor_value == 1:
+                print("HUMAN AHEAD !!")
+                #Covert text to speech
+                speech = "HUMAN AHEAD !!"
+                subprocess.run(['espeak', speech])
+            else:
+                print("OBJECT AHEAD !!")
+
             if dis <= 30:
                 GPIO.output(BUZZER, GPIO.LOW)
-                # Convert text to speech
-                speech = "HUMAN AHEAD !!"
-                subprocess.call(['espeak', speech])
             else:
                 GPIO.output(BUZZER, GPIO.HIGH)
-            waitForNoMotion()
+                waitForNoMotion()
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        destroy()
+
+def destroy():
+    GPIO.cleanup()
+
+if __name__ == "__main__":
+    setup()
+    try:
+        loop()
     except KeyboardInterrupt:
         destroy()
