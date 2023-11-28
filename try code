@@ -6,14 +6,14 @@ import os
 GPIO.setmode(GPIO.BCM)
 
 # Ultrasonic sensor pins
-TRIG = 23
-ECHO = 24
+TRIG = 11
+ECHO = 12
 
 # Active Buzzer pin
-BUZZER = 18
+BUZZER = 13
 
 # Infrared motion sensor pin
-MOTION_SENSOR = 25
+MOTION_SENSOR = 40
 
 # Set up GPIO pins
 GPIO.setup(TRIG, GPIO.OUT)
