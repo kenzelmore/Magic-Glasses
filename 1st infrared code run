@@ -1,17 +1,23 @@
 from machine import Pin
 import utime
 
+# Create a Pin object for the LED on pin 28
 led = Pin(28, Pin.OUT)
-pir = PIn(16, Pin.IN, Pin.PULL_UP)
-led.low()
-utime.sleep(3)
+
+# Create a Pin object for the PIR sensor on pin 16, with input mode and pull-up resistor enabled
+pir = Pin(16, Pin.IN, Pin.PULL_UP)
+
+led.low()  # Turn off the LED initially
+utime.sleep(3)  # Wait for 3 seconds
+
 while True:
-  print(pir.value())
-  if pir.value () == 0:
-    print("LED On")
-    led.high()
-    utime.sleep(5)
-  else:
-    print("Waiting for movement")
-    led.low()
-    utime.sleep (0.2)
+    print(pir.value())  # Print the current value of the PIR sensor
+
+    if pir.value() == 0:
+        print("LED On")
+        led.high()  # Turn on the LED
+        utime.sleep(5)  # Keep the LED on for 5 seconds
+    else:
+        print("Waiting for movement")
+        led.low()  # Turn off the LED
+        utime.sleep(0.2)  # Wait for 0.2 seconds
