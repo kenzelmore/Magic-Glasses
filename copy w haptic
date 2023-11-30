@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+
+import RPi.GPIO as GPIO
+import time
+
+buzz_enabled = True
+beep_enabled = True
+
+TRIG = 11
+ECHO = 12
+BUZZER = 13
+MOTION = 40
+
+def setup():
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(TRIG, GPIO.OUT)
+    GPIO.setup(ECHO, GPIO.IN)
+    GPIO.setup(BUZZER, GPIO.OUT)
+    GPIO.output(BUZZER, GPIO.HIGH)
+    GPIO.setup(MOTION, GPIO.IN)
+
+def distance():
+    GPIO.output(TRIG, 0)
+    time.sleep(0.000002)
+    GPIO.output(TRIG, 1)
+    time.sleep(0.00001)
+    GPIO.output(TRIG, 0)
+
+    while GPIO.input(ECHO) == 0:
+        a = 0
+    time1 = time.time()
+    while GPIO.input(ECHO) == 1:
+        a = 1
+    time2 = time.time()
+
+    during = time2 - time1
+    return during * 340 / 2 * 100
+
+def loop():
+    if beep_enabled:
+        waitForMotion()
+        time.sleep(0.1)
+        beep()
+        waitForNoMotion()
+        time.sleep(2)
+
+def waitForMotion():
+    while True:
+        i = GPIO.input(MOTION)
+        if i == 1:
+            break
+
+def waitForNoMotion():
+    while True:
+        i = GPIO.input(MOTION)
+        if i == 0:
+            break
+
+def destroy():
+    GPIO.output(BUZZER, GPIO.HIGH)
+    GPIO.cleanup()
+
+def beep():
+    for _ in range(2):
+        GPIO.output(BUZZER, GPIO.LOW)
+        time.sleep(0.1)
+        GPIO.output(BUZZER, GPIO.HIGH)
+        time.sleep(0.1)
+
+if __name__ == "__main__":
+    setup()
+    try:
+        while True:
+            loop()
+    except KeyboardInterrupt:
+        destroy()
