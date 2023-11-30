@@ -7,42 +7,41 @@ TRIG = 11
 ECHO = 12
 
 def setup():
-	GPIO.setmode(GPIO.BOARD)
-	GPIO.setup(TRIG, GPIO.OUT)
-	GPIO.setup(ECHO, GPIO.IN)
+    GPIO.setmode(GPIO.BOARD)  # Set GPIO mode to use board pin numbers
+    GPIO.setup(TRIG, GPIO.OUT)  # Set TRIG pin as an output
+    GPIO.setup(ECHO, GPIO.IN)   # Set ECHO pin as an input
 
 def distance():
-	GPIO.output(TRIG, 0)
-	time.sleep(0.000002)
+    GPIO.output(TRIG, 0)  # Set TRIG pin to low
+    time.sleep(0.000002)
 
-	GPIO.output(TRIG, 1)
-	time.sleep(0.00001)
-	GPIO.output(TRIG, 0)
+    GPIO.output(TRIG, 1)  # Set TRIG pin to high
+    time.sleep(0.00001)
+    GPIO.output(TRIG, 0)
 
-	
-	while GPIO.input(ECHO) == 0:
-		a = 0
-	time1 = time.time()
-	while GPIO.input(ECHO) == 1:
-		a = 1
-	time2 = time.time()
+    while GPIO.input(ECHO) == 0:
+        a = 0
+    time1 = time.time()
+    while GPIO.input(ECHO) == 1:
+        a = 1
+    time2 = time.time()
 
-	during = time2 - time1
-	return during * 340 / 2 * 100
+    during = time2 - time1
+    return during * 340 / 2 * 100  # Calculate distance in feet
 
 def loop():
-	while True:
-		dis = distance()
-		print (dis, 'ft')
-		print ('')
-		time.sleep(0.3)
+    while True:
+        dis = distance()
+        print(dis, 'ft')
+        print('')
+        time.sleep(0.3)
 
 def destroy():
-	GPIO.cleanup()
+    GPIO.cleanup()  # Clean up GPIO settings on exit
 
 if __name__ == "__main__":
-	setup()
-	try:
-		loop()
-	except KeyboardInterrupt:
-		destroy()
+    setup()
+    try:
+        loop()
+    except KeyboardInterrupt:
+        destroy()
