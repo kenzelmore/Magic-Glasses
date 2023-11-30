@@ -1,27 +1,26 @@
-import RPi.GPIO as GPIO
-import time
+import RPi.GPIO as GPIO  # Import the RPi.GPIO library for Raspberry Pi GPIO operations
+import time  # Import the time module for adding delays in the program
 
-# Define the pin numbers for the sensors
-TRIG = 11
-ECHO = 12
-BUZZER = 13
-MOTION = 18
+# Define GPIO pin numbers for sensors
+TRIG = 11  # GPIO pin for the TRIG pin of the ultrasonic sensor
+ECHO = 12  # GPIO pin for the ECHO pin of the ultrasonic sensor
+BUZZER = 13  # GPIO pin for the buzzer
+MOTION = 18  # GPIO pin for the motion sensor
 
+# Function to set up the GPIO configuration
 def setup():
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setwarnings(False)
-    GPIO.setup(TRIG, GPIO.OUT)
-    GPIO.setup(ECHO, GPIO.IN)
-    GPIO.setup(BUZZER, GPIO.OUT)
-    GPIO.setup(MOTION, GPIO.IN)
+    GPIO.setmode(GPIO.BOARD)  # Set the GPIO mode to use board pin numbers
+    GPIO.setwarnings(False)  # Disable GPIO warnings
+    GPIO.setup(TRIG, GPIO.OUT)  # Set TRIG pin as an output
+    GPIO.setup(ECHO, GPIO.IN)   # Set ECHO pin as an input
+    GPIO.setup(BUZZER, GPIO.OUT)  # Set BUZZER pin as an output
+    GPIO.setup(MOTION, GPIO.IN)  # Set MOTION pin as an input
 
+# Function to measure the distance using the ultrasonic sensor
 def distance():
-    # Set the trigger to HIGH
-    GPIO.output(TRIG, GPIO.HIGH)
-
-    # Set the trigger after 0.01ms to LOW
-    time.sleep(0.00001)
-    GPIO.output(TRIG, GPIO.LOW)
+    GPIO.output(TRIG, GPIO.HIGH)  # Set the trigger to HIGH
+    time.sleep(0.00001)  # Wait for 0.01ms
+    GPIO.output(TRIG, GPIO.LOW)  # Set the trigger to LOW
 
     StartTime = time.time()
     StopTime = time.time()
@@ -42,38 +41,43 @@ def distance():
 
     return distance
 
+# Function to wait for motion detection
 def waitForMotion():
     while True:
         i = GPIO.input(MOTION)
         if i == 1:
             break
 
+# Function to wait for no motion
 def waitForNoMotion():
     while True:
         i = GPIO.input(MOTION)
         if i == 0:
             break
 
+# Main loop of the program
 def loop():
     try:
         while True:
-            waitForMotion()
-            dis = distance()
-            print(f'Distance: {dis:.2f} inches')
-            if dis <= 30:
-                GPIO.output(BUZZER, GPIO.LOW)
+            waitForMotion()  # Wait for motion to be detected
+            dis = distance()  # Get the distance measured by the ultrasonic sensor
+            print(f'Distance: {dis:.2f} inches')  # Print the distance in inches with 2 decimal places
+            if dis <= 30:  # If the distance is less than or equal to 30 inches
+                GPIO.output(BUZZER, GPIO.LOW)  # Turn off the buzzer
             else:
-                GPIO.output(BUZZER, GPIO.HIGH)
-            waitForNoMotion()
+                GPIO.output(BUZZER, GPIO.HIGH)  # Turn on the buzzer
+            waitForNoMotion()  # Wait for motion to stop
     except KeyboardInterrupt:
-        destroy()
+        destroy()  # Call the destroy function if the program is interrupted by a keyboard interrupt
 
+# Function to clean up GPIO settings when the program is terminated
 def destroy():
-    GPIO.cleanup()
+    GPIO.cleanup()  # Cleanup GPIO settings
 
+# Main entry point of the program
 if __name__ == "__main__":
-    setup()
+    setup()  # Call the setup function to initialize GPIO settings
     try:
-        loop()
+        loop()  # Call the main loop function
     except KeyboardInterrupt:
-        destroy()
+        destroy()  # Call the destroy function if the program is interrupted by a keyboard interrupt
