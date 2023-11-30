@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
 
-import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO  # Import the RPi.GPIO library for Raspberry Pi GPIO operations
 import time
 
-TRIG = 11
-ECHO = 12
-BUZZER = 13  # GPIO pin for the buzzer
+TRIG = 11      # GPIO pin for ultrasonic sensor trigger
+ECHO = 12      # GPIO pin for ultrasonic sensor echo
+BUZZER = 13    # GPIO pin for the buzzer
 IR_SENSOR = 18  # GPIO pin for the infrared sensor
 
 def setup():
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setwarnings(False)
-    GPIO.setup(TRIG, GPIO.OUT)
-    GPIO.setup(ECHO, GPIO.IN)
-    GPIO.setup(BUZZER, GPIO.OUT)
-    GPIO.setup(IR_SENSOR, GPIO.IN)
+    GPIO.setmode(GPIO.BOARD)  # Set the GPIO mode to use board pin numbers
+    GPIO.setwarnings(False)  # Disable GPIO warnings
+    GPIO.setup(TRIG, GPIO.OUT)  # Set TRIG pin as an output
+    GPIO.setup(ECHO, GPIO.IN)   # Set ECHO pin as an input
+    GPIO.setup(BUZZER, GPIO.OUT)  # Set BUZZER pin as an output
+    GPIO.setup(IR_SENSOR, GPIO.IN)  # Set IR_SENSOR pin as an input
 
 def distance():
-    GPIO.output(TRIG, 0)
-    time.sleep(0.000002)
+    GPIO.output(TRIG, 0)  # Set TRIG pin to low
+    time.sleep(0.000002)  # Wait for 2 microseconds
 
-    GPIO.output(TRIG, 1)
-    time.sleep(0.00001)
-    GPIO.output(TRIG, 0)
+    GPIO.output(TRIG, 1)  # Set TRIG pin to high
+    time.sleep(0.00001)   # Wait for 10 microseconds
+    GPIO.output(TRIG, 0)  # Set TRIG pin to low
 
     while GPIO.input(ECHO) == 0:
         pass
@@ -49,19 +49,19 @@ def loop():
                 print("I SEE OBJECT !!")
 
             if dis <= 30:
-                GPIO.output(BUZZER, GPIO.LOW)
+                GPIO.output(BUZZER, GPIO.LOW)  # Turn off the buzzer
             else:
-                GPIO.output(BUZZER, GPIO.HIGH)
+                GPIO.output(BUZZER, GPIO.HIGH)  # Turn on the buzzer
             time.sleep(0.1)
     except KeyboardInterrupt:
         destroy()
 
 def destroy():
-    GPIO.cleanup()
+    GPIO.cleanup()  # Clean up GPIO settings when the program is terminated
 
 if __name__ == "__main__":
-    setup()
+    setup()  # Call the setup function to initialize GPIO settings
     try:
-        loop()
+        loop()  # Call the main loop function
     except KeyboardInterrupt:
-        destroy()
+        destroy()  # Call the destroy function if the program is interrupted by a keyboard interrupt
