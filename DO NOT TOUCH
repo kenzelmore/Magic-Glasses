@@ -3,56 +3,74 @@
 import RPi.GPIO as GPIO
 import time
 
-TRIG = 11
-ECHO = 12
+# Define GPIO pin numbers
+TRIG = 11    # GPIO pin for the ultrasonic sensor trigger
+ECHO = 12    # GPIO pin for the ultrasonic sensor echo
 BUZZER = 13  # GPIO pin for the buzzer
 
 def setup():
+    # Set up the GPIO mode and suppress warnings
     GPIO.setmode(GPIO.BOARD)
     GPIO.setwarnings(False)
+    
+    # Set TRIG as output and ECHO as input
     GPIO.setup(TRIG, GPIO.OUT)
     GPIO.setup(ECHO, GPIO.IN)
+    
+    # Set up BUZZER as output
     GPIO.setup(BUZZER, GPIO.OUT)
 
 def distance():
+    # Send a short pulse to trigger the ultrasonic sensor
     GPIO.output(TRIG, 0)
     time.sleep(0.000002)
-
     GPIO.output(TRIG, 1)
     time.sleep(0.00001)
     GPIO.output(TRIG, 0)
 
+    # Measure the duration of the pulse on the ECHO pin
     while GPIO.input(ECHO) == 0:
         pass
     time1 = time.time()
+    
     while GPIO.input(ECHO) == 1:
         pass
     time2 = time.time()
 
+    # Calculate the distance based on the time duration
     during = time2 - time1
     return during * 340 / 2 * 39.37  # Convert to inches
 
 def loop():
     try:
         while True:
+            # Get the distance and print it
             dis = distance()
             print(f'Distance: {dis:.2f} inches')
+            
+            # Activate buzzer if the distance is less than or equal to 30 inches
             if dis <= 30:
                 GPIO.output(BUZZER, GPIO.LOW)
                 time.sleep(0.1)
             else:
                 GPIO.output(BUZZER, GPIO.HIGH)
+            
             time.sleep(0.1)
     except KeyboardInterrupt:
+        # Handle keyboard interrupt by calling the destroy function
         destroy()
 
 def destroy():
-     
+    # Clean up GPIO settings
     GPIO.cleanup()
 
 if __name__ == "__main__":
+    # Call the setup function
     setup()
+    
     try:
+        # Call the loop function
         loop()
     except KeyboardInterrupt:
-        destroy()   
+        # Handle keyboard interrupt by calling the destroy function
+        destroy()
