@@ -1,14 +1,22 @@
 try:
     while True:
-        time.sleep(0.1)
+        time.sleep(0.1)  # Wait for 0.1 seconds to avoid high CPU usage
+
+        # Read the current state of the PIR sensor
         current_state = GPIO.input(pir_sensor)
+
+        # Check if motion is detected (current_state == 1)
         if current_state == 1:
             print("GPIO pin %s is %s" % (pir_sensor, current_state))
-            GPIO.output(piezo,True)
-            time.sleep(1)
-            GPIO.output(piezo,False)
-            time.sleep(5)
+
+            # Activate the piezo buzzer
+            GPIO.output(piezo, True)
+            time.sleep(1)  # Keep the buzzer on for 1 second
+            GPIO.output(piezo, False)  # Turn off the buzzer
+            time.sleep(5)  # Wait for 5 seconds to avoid rapid retriggering of the PIR sensor
+
 except KeyboardInterrupt:
-    pass
+    pass  # Handle a keyboard interrupt, allowing for a clean exit
+
 finally:
-    GPIO.cleanup()
+    GPIO.cleanup()  # Clean up GPIO settings when exiting the program
