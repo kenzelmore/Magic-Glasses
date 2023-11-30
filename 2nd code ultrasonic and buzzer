@@ -1,52 +1,56 @@
-import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO  # Import the RPi.GPIO library for Raspberry Pi GPIO operations
 import time
 
 # Set up GPIO
-GPIO.setmode(GPIO.BCM)
-TRIG = 23
-ECHO = 24
-BUZZER_PIN = 25
+GPIO.setmode(GPIO.BCM)  # Set the GPIO mode to use Broadcom (BCM) pin numbers
+TRIG = 23  # GPIO pin for the ultrasonic sensor trigger
+ECHO = 24  # GPIO pin for the ultrasonic sensor echo
+BUZZER_PIN = 25  # GPIO pin for the buzzer
 
-GPIO.setup(TRIG, GPIO.OUT)
-GPIO.setup(ECHO, GPIO.IN)
-GPIO.setup(BUZZER_PIN, GPIO.OUT)
+# Set up the GPIO pin modes
+GPIO.setup(TRIG, GPIO.OUT)  # Set TRIG pin as an output
+GPIO.setup(ECHO, GPIO.IN)   # Set ECHO pin as an input
+GPIO.setup(BUZZER_PIN, GPIO.OUT)  # Set BUZZER_PIN as an output
 
 def distance():
-    GPIO.output(TRIG, True)
-    time.sleep(0.00001)
-    GPIO.output(TRIG, False)
-    pulse_start = time.time()
+    GPIO.output(TRIG, True)  # Set the TRIG pin to high
+    time.sleep(0.00001)  # Wait for 10 microseconds
+    GPIO.output(TRIG, False)  # Set the TRIG pin to low
+
+    pulse_start = time.time()  # Record the time when the ultrasonic pulse is transmitted
     pulse_end = time.time()
 
     while GPIO.input(ECHO) == 0:
-        pulse_start = time.time()
+        pulse_start = time.time()  # Record the time when the ultrasonic pulse is received
 
     while GPIO.input(ECHO) == 1:
-        pulse_end = time.time()
+        pulse_end = time.time()  # Record the time when the ultrasonic pulse is reflected back
 
-    pulse_duration = pulse_end - pulse_start
-    distance = pulse_duration * 17150
-    distance = round(distance, 2)
+    pulse_duration = pulse_end - pulse_start  # Calculate the duration of the ultrasonic pulse
+    distance = pulse_duration * 17150  # Convert the pulse duration to distance in centimeters
+    distance = round(distance, 2)  # Round the distance to two decimal places
     return distance
 
 try:
     while True:
-        dist = distance()
+        dist = distance()  # Get the distance measured by the ultrasonic sensor
         print("Measured Distance = %.1f cm" % dist)
+
+        # Check the distance and activate the buzzer accordingly
         if 5 <= dist <= 10:
-            GPIO.output(BUZZER_PIN, GPIO.HIGH)
-            time.sleep(1)
-            GPIO.output(BUZZER_PIN, GPIO.LOW)
-            time.sleep(1)
+            GPIO.output(BUZZER_PIN, GPIO.HIGH)  # Turn on the buzzer
+            time.sleep(1)  # Keep the buzzer on for 1 second
+            GPIO.output(BUZZER_PIN, GPIO.LOW)  # Turn off the buzzer
+            time.sleep(1)  # Pause for 1 second
         elif dist < 5:
             for _ in range(5):
-                GPIO.output(BUZZER_PIN, GPIO.HIGH)
-                time.sleep(0.1)
-                GPIO.output(BUZZER_PIN, GPIO.LOW)
-                time.sleep(0.1)
+                GPIO.output(BUZZER_PIN, GPIO.HIGH)  # Turn on the buzzer
+                time.sleep(0.1)  # Keep the buzzer on for 0.1 seconds
+                GPIO.output(BUZZER_PIN, GPIO.LOW)  # Turn off the buzzer
+                time.sleep(0.1)  # Pause for 0.1 seconds
         else:
-            GPIO.output(BUZZER_PIN, GPIO.LOW)
+            GPIO.output(BUZZER_PIN, GPIO.LOW)  # Turn off the buzzer
 
 except KeyboardInterrupt:
     print("Measurement stopped by User")
-    GPIO.cleanup()
+    GPIO.cleanup()  # Clean up GPIO settings when the program is terminated
