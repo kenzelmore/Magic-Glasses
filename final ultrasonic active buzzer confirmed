@@ -27,12 +27,15 @@ def distance():
     GPIO.output(TRIG, 0)
 
     # Measure the time taken for the ECHO pin to go high and then low
-    while GPIO.input(ECHO) == 0:
-        pass
-    time1 = time.time()
-    while GPIO.input(ECHO) == 1:
-        pass
-    time2 = time.time()
+timeout = time.time() + 1  # 1-second timeout
+while GPIO.input(ECHO) == 0:
+    if time.time() > timeout:
+        raise Exception("Ultrasonic sensor timeout (ECHO pin not going high)")
+time1 = time.time()
+while GPIO.input(ECHO) == 1:
+    if time.time() > timeout:
+        raise Exception("Ultrasonic sensor timeout (ECHO pin not going low)")
+time2 = time.time()
 
     # Calculate the duration of the pulse and convert it to distance in inches
     during = time2 - time1
