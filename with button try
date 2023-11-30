@@ -1,0 +1,75 @@
+import RPi.GPIO as GPIO
+import time
+
+# Define GPIO pin numbers for ultrasonic sensor
+TRIG = 11  # GPIO pin for the TRIG pin of the ultrasonic sensor
+ECHO = 12  # GPIO pin for the ECHO pin of the ultrasonic sensor
+
+# Define GPIO pin numbers for the active buzzer and the button
+BUZZER = 13
+BUTTON = 18
+
+# Set the distance threshold for activating the buzzer (in centimeters)
+DISTANCE_THRESHOLD = 30
+
+def setup():
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setwarnings(False)
+    GPIO.setup(TRIG, GPIO.OUT)
+    GPIO.setup(ECHO, GPIO.IN)
+    GPIO.setup(BUZZER, GPIO.OUT)
+    GPIO.setup(BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Set up the button with a pull-up resistor
+    GPIO.output(BUZZER, GPIO.LOW)  # Ensure the buzzer is initially turned off
+
+def measure_distance():
+    GPIO.output(TRIG, 0)
+    time.sleep(0.000002)
+
+    GPIO.output(TRIG, 1)
+    time.sleep(0.00001)
+    GPIO.output(TRIG, 0)
+
+    while GPIO.input(ECHO) == 0:
+        pass
+    time1 = time.time()
+    while GPIO.input(ECHO) == 1:
+        pass
+    time2 = time.time()
+
+    during = time2 - time1
+    distance = during * 340 / 2 * 100  # Convert to centimeters
+    return distance
+
+def activate_buzzer():
+    GPIO.output(BUZZER, GPIO.HIGH)
+
+def deactivate_buzzer():
+    GPIO.output(BUZZER, GPIO.LOW)
+
+def main():
+    try:
+        setup()
+        buzzer_active = False
+
+        while True:
+            distance = measure_distance()
+            print(f'Distance: {distance:.2f} cm')
+
+            button_state = GPIO.input(BUTTON)
+
+            if distance < DISTANCE_THRESHOLD and not buzzer_active:
+                activate_buzzer()
+                buzzer_active = True
+            elif distance >= DISTANCE_THRESHOLD or button_state == 0:
+                deactivate_buzzer()
+                buzzer_active = False
+
+            time.sleep(0.1)
+
+    except KeyboardInterrupt:
+        pass
+    finally:
+        GPIO.cleanup()
+
+if __name__ == "__main__":
+    main()
