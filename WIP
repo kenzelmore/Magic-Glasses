@@ -1,67 +1,63 @@
 import RPi.GPIO as GPIO
 import time
 
-# Define GPIO pin numbers for ultrasonic sensor
-TRIG = 11  # GPIO pin for the TRIG pin of the ultrasonic sensor
-ECHO = 12  # GPIO pin for the ECHO pin of the ultrasonic sensor
+# Define GPIO pins for ultrasonic sensor
+TRIG_PIN = 11
+ECHO_PIN = 12
 
-# Define GPIO pin number for the active buzzer
-BUZZER = 13
+# Define GPIO pin for the active buzzer
+BUZZER_PIN = 13
 
-# Set the distance threshold for activating the buzzer (in centimeters)
-DISTANCE_THRESHOLD = 30
-
-def setup():
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setwarnings(False)
-    GPIO.setup(TRIG, GPIO.OUT)
-    GPIO.setup(ECHO, GPIO.IN)
-    GPIO.setup(BUZZER, GPIO.OUT)
-    GPIO.output(BUZZER, GPIO.LOW)  # Ensure the buzzer is initially turned off
+# Set GPIO mode and setup
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(TRIG_PIN, GPIO.OUT)
+GPIO.setup(ECHO_PIN, GPIO.IN)
+GPIO.setup(BUZZER_PIN, GPIO.OUT)
 
 def measure_distance():
-    GPIO.output(TRIG, 0)
-    time.sleep(0.000002)
-
-    GPIO.output(TRIG, 1)
+    # Send a 10us pulse to trigger the ultrasonic sensor
+    GPIO.output(TRIG_PIN, True)
     time.sleep(0.00001)
-    GPIO.output(TRIG, 0)
+    GPIO.output(TRIG_PIN, False)
 
-    while GPIO.input(ECHO) == 0:
+    # Wait for the ECHO pin to go high
+    start_time = time.time()
+    while GPIO.input(ECHO_PIN) == 0 and time.time() - start_time < 0.1:
         pass
-    time1 = time.time()
-    while GPIO.input(ECHO) == 1:
-        pass
-    time2 = time.time()
 
-    during = time2 - time1
-    distance = during * 340 / 2 * 100  # Convert to centimeters
+    # Record the start time of the pulse
+    pulse_start = time.time()
+
+    # Wait for the ECHO pin to go low
+    while GPIO.input(ECHO_PIN) == 1 and time.time() - start_time < 0.1:
+        pass
+
+    # Record the end time of the pulse
+    pulse_end = time.time()
+
+    # Calculate the pulse duration and convert it to distance
+    pulse_duration = pulse_end - pulse_start
+    distance = pulse_duration * 17150  # Speed of sound is 343 meters/second
+
     return distance
 
-def activate_buzzer():
-    GPIO.output(BUZZER, GPIO.HIGH)
+try:
+    while True:
+        # Measure distance
+        distance = measure_distance()
+        print(f"Distance: {distance:.2f} cm")
 
-def deactivate_buzzer():
-    GPIO.output(BUZZER, GPIO.LOW)
+        # Check if the distance is less than or equal to 30 inches (76.2 cm)
+        if distance <= 76.2:
+            # Turn on the buzzer
+            GPIO.output(BUZZER_PIN, GPIO.HIGH)
+        else:
+            # Turn off the buzzer
+            GPIO.output(BUZZER_PIN, GPIO.LOW)
 
-def main():
-    try:
-        setup()
-        while True:
-            distance = measure_distance()
-            print(f'Distance: {distance:.2f} cm')
+        # Wait for a short time before taking the next measurement
+        time.sleep(0.5)
 
-            if distance < DISTANCE_THRESHOLD:
-                activate_buzzer()
-            else:
-                deactivate_buzzer()
-
-            time.sleep(0.1)
-
-    except KeyboardInterrupt:
-        pass
-    finally:
-        GPIO.cleanup()
-
-if __name__ == "__main__":
-    main()
+except KeyboardInterrupt:
+    print("Measurement stopped by the user")
+    GPIO.cleanup()
