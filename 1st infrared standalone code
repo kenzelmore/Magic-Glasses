@@ -1,20 +1,22 @@
-import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO  # Import the RPi.GPIO library for Raspberry Pi GPIO operations
 
-# Define the pin number to which the motion sensor is connected
+# Define the GPIO pin number to which the motion sensor is connected
 MOTION = 18
 
 # Set up the GPIO mode and initial state
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(MOTION, GPIO.IN)
+GPIO.setmode(GPIO.BCM)  # Set the GPIO mode to use Broadcom (BCM) pin numbers
+GPIO.setup(MOTION, GPIO.IN)  # Set the MOTION pin as an input
 
+# Function to wait for motion detection
 def waitForMotion():
     while True:
-        i = GPIO.input(MOTION)
-        if i == 1:
+        i = GPIO.input(MOTION)  # Read the current state of the motion sensor
+        if i == 1:  # If motion is detected (sensor reads high), exit the loop
             break
 
+# Function to wait for no motion
 def waitForNoMotion():
     while True:
-        i = GPIO.input(MOTION)
-        if i == 0:
+        i = GPIO.input(MOTION)  # Read the current state of the motion sensor
+        if i == 0:  # If no motion is detected (sensor reads low), exit the loop
             break
