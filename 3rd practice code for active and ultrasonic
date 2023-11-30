@@ -1,39 +1,39 @@
 #!/usr/bin/env python3
-import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO  # Import the RPi.GPIO library for Raspberry Pi GPIO operations
 import time
 
-Buzzer = 11    # pin11
+Buzzer = 11  # GPIO pin for the buzzer (pin11)
 
 def setup(pin):
-	global BuzzerPin
-	BuzzerPin = pin
-	GPIO.setmode(GPIO.BOARD)       # Numbers GPIOs by physical location
-	GPIO.setup(BuzzerPin, GPIO.OUT)
-	GPIO.output(BuzzerPin, GPIO.HIGH)
+    global BuzzerPin
+    BuzzerPin = pin
+    GPIO.setmode(GPIO.BOARD)  # Numbers GPIOs by physical location
+    GPIO.setup(BuzzerPin, GPIO.OUT)
+    GPIO.output(BuzzerPin, GPIO.HIGH)  # Set initial state to HIGH (off)
 
 def on():
-	GPIO.output(BuzzerPin, GPIO.LOW)
+    GPIO.output(BuzzerPin, GPIO.LOW)  # Turn on the buzzer
 
 def off():
-	GPIO.output(BuzzerPin, GPIO.HIGH)
+    GPIO.output(BuzzerPin, GPIO.HIGH)  # Turn off the buzzer
 
 def beep(x):
-	on()
-	time.sleep(x)
-	off()
-	time.sleep(x)
+    on()
+    time.sleep(x)
+    off()
+    time.sleep(x)
 
 def loop():
-	while True:
-		beep(0.5)
+    while True:
+        beep(0.5)  # Beep for 0.5 seconds
 
 def destroy():
-	GPIO.output(BuzzerPin, GPIO.HIGH)
-	GPIO.cleanup()                     # Release resource
+    GPIO.output(BuzzerPin, GPIO.HIGH)  # Turn off the buzzer before cleanup
+    GPIO.cleanup()  # Release resources
 
-if __name__ == '__main__':     # Program start from here
-	setup(Buzzer)
-	try:
-		loop()
-	except KeyboardInterrupt:  # When 'Ctrl+C' is pressed, the child program destroy() will be  executed.
-		destroy()
+if __name__ == '__main__':  # Program starts from here
+    setup(Buzzer)
+    try:
+        loop()
+    except KeyboardInterrupt:  # When 'Ctrl+C' is pressed, the child program destroy() will be executed.
+        destroy()
