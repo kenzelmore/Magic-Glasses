@@ -1,68 +1,69 @@
 #!/usr/bin/env python3
 
-# Import necessary libraries
-import RPi.GPIO as GPIO  # Import the RPi.GPIO library for Raspberry Pi GPIO operations
-import time  # Import the time module for adding delays in the program
+import RPi.GPIO as GPIO
+import time
 
-# Define GPIO pin numbers for ultrasonic sensor and buzzer
+# Define GPIO pin numbers for ultrasonic sensor
 TRIG = 11  # GPIO pin for the TRIG pin of the ultrasonic sensor
 ECHO = 12  # GPIO pin for the ECHO pin of the ultrasonic sensor
-BUZZER = 13  # GPIO pin for the buzzer
 
-# Function to set up the GPIO configuration
+# Define GPIO pin number for the active buzzer
+BUZZER = 13
+
+# Set the distance threshold for activating the buzzer (in centimeters)
+DISTANCE_THRESHOLD = 30
+
 def setup():
-    GPIO.setmode(GPIO.BOARD)  # Set the GPIO mode to use board pin numbers
-    GPIO.setwarnings(False)  # Disable GPIO warnings
-    GPIO.setup(TRIG, GPIO.OUT)  # Set TRIG pin as an output
-    GPIO.setup(ECHO, GPIO.IN)   # Set ECHO pin as an input
-    GPIO.setup(BUZZER, GPIO.OUT)  # Set BUZZER pin as an output
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setwarnings(False)
+    GPIO.setup(TRIG, GPIO.OUT)
+    GPIO.setup(ECHO, GPIO.IN)
+    GPIO.setup(BUZZER, GPIO.OUT)
+    GPIO.output(BUZZER, GPIO.LOW)  # Ensure the buzzer is initially turned off
 
-# Function to measure the distance using the ultrasonic sensor
-def distance():
-    GPIO.output(TRIG, 0)  # Ensure TRIG is low
-    time.sleep(0.000002)  # Wait for 2 microseconds
+def measure_distance():
+    GPIO.output(TRIG, 0)
+    time.sleep(0.000002)
 
-    GPIO.output(TRIG, 1)  # Send a 10 microsecond pulse to trigger the ultrasonic module
+    GPIO.output(TRIG, 1)
     time.sleep(0.00001)
     GPIO.output(TRIG, 0)
 
-    # Measure the time taken for the ECHO pin to go high and then low
-timeout = time.time() + 1  # 1-second timeout
-while GPIO.input(ECHO) == 0:
-    if time.time() > timeout:
-        raise Exception("Ultrasonic sensor timeout (ECHO pin not going high)")
-time1 = time.time()
-while GPIO.input(ECHO) == 1:
-    if time.time() > timeout:
-        raise Exception("Ultrasonic sensor timeout (ECHO pin not going low)")
-time2 = time.time()
+    while GPIO.input(ECHO) == 0:
+        pass
+    time1 = time.time()
+    while GPIO.input(ECHO) == 1:
+        pass
+    time2 = time.time()
 
-    # Calculate the duration of the pulse and convert it to distance in inches
     during = time2 - time1
-    return during * 340 / 2 * 39.37  # Speed of sound in air is approximately 340 m/s
+    distance = during * 340 / 2 * 100  # Convert to centimeters
+    return distance
 
-# Main loop of the program
-def loop():
+def activate_buzzer():
+    GPIO.output(BUZZER, GPIO.HIGH)
+
+def deactivate_buzzer():
+    GPIO.output(BUZZER, GPIO.LOW)
+
+def main():
     try:
+        setup()
         while True:
-            dis = distance()  # Get the distance measured by the ultrasonic sensor
-            print(f'Distance: {dis:.2f} inches')  # Print the distance in inches with 2 decimal places
-            if dis <= 30:  # If the distance is less than or equal to 30 inches
-                GPIO.output(BUZZER, GPIO.LOW)  # Turn off the buzzer
+            distance = measure_distance()
+            print(f'Distance: {distance:.2f} cm')
+
+            if distance < DISTANCE_THRESHOLD:
+                activate_buzzer()
             else:
-                GPIO.output(BUZZER, GPIO.HIGH)  # Turn on the buzzer
-            time.sleep(0.1)  # Wait for 0.1 seconds before the next iteration
+                deactivate_buzzer()
+
+            time.sleep(0.1)
+
     except KeyboardInterrupt:
-        destroy()  # Call the destroy function if the program is interrupted by a keyboard interrupt
+        pass
+    finally:
+        GPIO.cleanup()
 
-# Function to clean up GPIO settings when the program is terminated
-def destroy():
-    GPIO.cleanup()  # Cleanup GPIO settings
-
-# Main entry point of the program
 if __name__ == "__main__":
-    setup()  # Call the setup function to initialize GPIO settings
-    try:
-        loop()  # Call the main loop function
-    except KeyboardInterrupt:
-        destroy()  # Call the destroy function if the program is interrupted by a keyboard interrupt
+    main()
