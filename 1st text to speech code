@@ -1,27 +1,28 @@
 #!/usr/bin/env python3
 
-import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO  # Import the RPi.GPIO library for Raspberry Pi GPIO operations
 import time
-import subprocess
+import subprocess  # Import the subprocess module for running external commands
 
-TRIG = 11      # GPIO pin for ultrasonic
-ECHO = 12      # ^
+# Define GPIO pin numbers for sensors and actuators
+TRIG = 11      # GPIO pin for ultrasonic sensor trigger
+ECHO = 12      # GPIO pin for ultrasonic sensor echo
 BUZZER = 13    # GPIO pin for the buzzer
 IR_SENSOR = 18  # GPIO pin for the infrared sensor
 
 def setup():
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setwarnings(False)
-    GPIO.setup(TRIG, GPIO.OUT)
-    GPIO.setup(ECHO, GPIO.IN)
-    GPIO.setup(BUZZER, GPIO.OUT)
-    GPIO.setup(IR_SENSOR, GPIO.IN)
+    GPIO.setmode(GPIO.BOARD)  # Set the GPIO mode to use board pin numbers
+    GPIO.setwarnings(False)  # Disable GPIO warnings
+    GPIO.setup(TRIG, GPIO.OUT)  # Set TRIG pin as an output
+    GPIO.setup(ECHO, GPIO.IN)   # Set ECHO pin as an input
+    GPIO.setup(BUZZER, GPIO.OUT)  # Set BUZZER pin as an output
+    GPIO.setup(IR_SENSOR, GPIO.IN)  # Set IR_SENSOR pin as an input
 
 def distance():
-    # Same as before
+    # Same as before, calculate and return the distance using ultrasonic sensor
 
 def controlBuzzer(state):
-    GPIO.output(BUZZER, state)
+    GPIO.output(BUZZER, state)  # Control the state of the buzzer (on/off)
 
 def waitForMotion(timeout=10):
     start_time = time.time()
@@ -40,8 +41,8 @@ def waitForNoMotion(timeout=10):
 def loop():
     try:
         while True:
-            waitForMotion()
-            dis = distance()
+            waitForMotion()  # Wait for motion detection
+            dis = distance()  # Get the distance measured by the ultrasonic sensor
             print(f'Distance: {dis:.2f} inches')
 
             sensor_value = GPIO.input(IR_SENSOR)
@@ -49,28 +50,28 @@ def loop():
 
             if sensor_value == 1:
                 print("HUMAN AHEAD !!")
-                # Convert text to speech
+                # Convert text to speech using the 'espeak' command
                 speech = "HUMAN AHEAD !!"
                 subprocess.run(['espeak', speech])
             else:
                 print("OBJECT AHEAD !!")
 
             if dis <= 30:
-                controlBuzzer(GPIO.HIGH)
+                controlBuzzer(GPIO.HIGH)  # Turn on the buzzer if the distance is less than or equal to 30 inches
             else:
-                controlBuzzer(GPIO.LOW)
-                waitForNoMotion()
-            time.sleep(0.1)
+                controlBuzzer(GPIO.LOW)  # Turn off the buzzer
+                waitForNoMotion()  # Wait for no motion before proceeding
+            time.sleep(0.1)  # Wait for 0.1 seconds before the next iteration
     except KeyboardInterrupt:
-        destroy()
+        destroy()  # Call the destroy function if the program is interrupted by a keyboard interrupt
 
 def destroy():
     controlBuzzer(GPIO.LOW)  # Turn off the buzzer before cleanup
-    GPIO.cleanup()
+    GPIO.cleanup()  # Cleanup GPIO settings
 
 if __name__ == "__main__":
-    setup()
+    setup()  # Call the setup function to initialize GPIO settings
     try:
-        loop()
+        loop()  # Call the main loop function
     except KeyboardInterrupt:
-        destroy()
+        destroy()  # Call the destroy function if the program is interrupted by a keyboard interrupt
